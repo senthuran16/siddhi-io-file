@@ -321,11 +321,11 @@ public class FileHandlingTestCase {
             }
         });
         siddhiAppRuntime.start();
-        SiddhiTestHelper.waitForEvents(100, 2, count.get(), 3000);
+        SiddhiTestHelper.waitForEvents(100, 2, count.get(), 4000);
         if (newFile.delete()) {
             log.debug("File is deleted");
         }
-        SiddhiTestHelper.waitForEvents(100, 3, count.get(), 3000);
+        SiddhiTestHelper.waitForEvents(100, 3, count.get(), 4000);
         siddhiAppRuntime.shutdown();
         Assert.assertEquals(3, count.get());
     }

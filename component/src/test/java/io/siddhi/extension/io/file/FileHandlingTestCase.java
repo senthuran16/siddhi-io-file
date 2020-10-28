@@ -310,10 +310,20 @@ public class FileHandlingTestCase {
                 EventPrinter.print(events);
                 int n = count.getAndIncrement();
                 for (Event event : events) {
-                    if (n == 0 || n == 2) {
-                        Assert.assertEquals(newRoot + "/destination.txt", event.getData(0));
-                    } else if (n == 1) {
-                        Assert.assertEquals(newRoot + "/destination", event.getData(0));
+                    if (n < 3) {
+                        if (event.getData(2).equals("created")) {
+                            if (event.getData(1).equals("destination.txt")) {
+                                Assert.assertEquals(newRoot + "/destination.txt", event.getData(0));
+                            } else if (event.getData(1).equals("destination")) {
+                                Assert.assertEquals(newRoot + "/destination", event.getData(0));
+                            } else {
+                                Assert.fail("Did not received correct events.");
+                            }
+                        } else if (event.getData(2).equals("removed")) {
+                            Assert.assertEquals(newRoot + "/destination.txt", event.getData(0));
+                        } else {
+                            Assert.fail("Did not received correct events.");
+                        }
                     } else {
                         Assert.fail("More events received than expected.");
                     }

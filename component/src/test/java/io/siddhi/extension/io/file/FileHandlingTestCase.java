@@ -284,12 +284,12 @@ public class FileHandlingTestCase {
     public void siddhiIOFileTest5() throws InterruptedException, IOException {
         log.info("Siddhi IO File Testcase 5");
         File newFile = new File(newRoot + "/destination.txt");
-        File newFolder = new File(newRoot + "/destination");
+        File newFile2 = new File(newRoot + "/destination");
         if (newFile.createNewFile()) {
             log.debug("New file has been created");
         }
-        if (newFolder.mkdir()) {
-            log.debug("New folder has been created");
+        if (newFile2.createNewFile()) {
+            log.debug("New file has been created");
         }
         String app = "" +
                 "@App:name('TestFileEventListener') @source(type='fileeventlistener', " +

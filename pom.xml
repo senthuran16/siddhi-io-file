@@ -94,9 +94,14 @@
                 <version>${siddhi.map.csv.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.commons.wso2</groupId>
+                <groupId>org.wso2.org.apache.commons</groupId>
                 <artifactId>commons-vfs2</artifactId>
-                <version>2.0-wso2v15</version>
+                <version>${commons-vfs2.wso2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jcraft</groupId>
+                <artifactId>jsch</artifactId>
+                <version>${com.jcraft.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.testng</groupId>
@@ -152,6 +157,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <carbon.analytics.version>3.0.36</carbon.analytics.version>
+        <commons-vfs2.wso2.version>2.2-wso2v1</commons-vfs2.wso2.version>
+        <com.jcraft.version>0.1.45</com.jcraft.version>
     </properties>
 
     <build>

@@ -79,6 +79,9 @@ public class FileSystemListener implements RemoteFileSystemListener {
             for (int i = 0; i < remoteFileSystemEvent.getAddedFiles().size(); i++) {
                 File a = new File(remoteFileSystemEvent.getAddedFiles().get(i).getPath());
                 String fileURI = a.toURI().toString();
+                if (!fileSourceConfiguration.addFileToListIfAbsent(fileURI)) {
+                    continue;
+                }
                 VFSClientConnector vfsClientConnector;
                 FileProcessor fileProcessor;
                 fileSourceConfiguration.setCurrentlyReadingFileURI(fileURI);

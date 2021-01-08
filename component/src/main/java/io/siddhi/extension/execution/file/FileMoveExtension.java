@@ -227,8 +227,8 @@ public class FileMoveExtension extends StreamFunctionProcessor {
                 }
             }
         } catch (FileSystemException e) {
-            throw new SiddhiAppRuntimeException("Exception occurred when getting the file type " +
-                    uri, e);
+            log.error("Exception occurred when getting the file type " + uri, e);
+            return new Object[]{false};
         }
         return new Object[]{true};
     }

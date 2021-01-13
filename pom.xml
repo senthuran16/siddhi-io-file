@@ -158,7 +158,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <carbon.analytics.version>3.0.36</carbon.analytics.version>
         <commons-vfs2.wso2.version>2.2-wso2v1</commons-vfs2.wso2.version>
-        <com.jcraft.version>0.1.45</com.jcraft.version>
+        <com.jcraft.version>0.1.54</com.jcraft.version>
     </properties>
 
     <build>

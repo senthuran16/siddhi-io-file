@@ -72,14 +72,16 @@ import java.util.regex.Pattern;
                                 "Note: Add an empty string to match all files",
                         type = DataType.STRING,
                         optional = true,
-                        defaultValue = "<Empty_String>"
+                        defaultValue = "<Empty_String>",
+                        dynamic = true
                 ),
                 @Parameter(
                         name = "exclude.root.dir",
                         description = "Exclude parent folder when moving the content.",
                         type = DataType.BOOL,
                         optional = true,
-                        defaultValue = "false"
+                        defaultValue = "false",
+                        dynamic = true
                 ),
                 @Parameter(
                         name = "file.system.options",

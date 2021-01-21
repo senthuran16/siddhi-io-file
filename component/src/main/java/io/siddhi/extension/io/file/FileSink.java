@@ -89,6 +89,16 @@ import java.util.Map;
                         type = {DataType.BOOL},
                         optional = true,
                         defaultValue = "true. (However, if the 'csv' mapper is used, it is false)"
+                ),
+                @Parameter(
+                        name = "file.system.options",
+                        description = "The file options in key:value pairs separated by commas. \n" +
+                                "eg:'USER_DIR_IS_ROOT:false,PASSIVE_MODE:true,AVOID_PERMISSION_CHECK:true," +
+                                "IDENTITY:file://demo/.ssh/id_rsa,IDENTITY_PASS_PHRASE:wso2carbon'\n" +
+                                "Note: when IDENTITY is used, use a RSA PRIVATE KEY",
+                        type = DataType.STRING,
+                        optional = true,
+                        defaultValue = "<Empty_String>"
                 )
         },
         examples = {
@@ -124,7 +134,7 @@ public class FileSink extends Sink {
     private boolean addEventSeparator;
     private String siddhiAppName;
     private SinkMetrics metrics;
-
+    private String fileSystemOptions;
 
     @Override
     public Class[] getSupportedInputEventClasses() {
@@ -151,6 +161,7 @@ public class FileSink extends Sink {
         addEventSeparator = optionHolder.isOptionExists(Constants.ADD_EVENT_SEPARATOR) ?
                 Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(Constants.ADD_EVENT_SEPARATOR)) :
                 !mapType.equalsIgnoreCase("csv");
+        this.fileSystemOptions = optionHolder.validateAndGetStaticValue(Constants.FILE_SYSTEM_OPTIONS, null);
         mapType = Utils.capitalizeFirstLetter(mapType);
         if (MetricsDataHolder.getInstance().getMetricService() != null &&
                 MetricsDataHolder.getInstance().getMetricManagementService().isEnabled()) {
@@ -173,6 +184,13 @@ public class FileSink extends Sink {
 
     public void connect() throws ConnectionUnavailableException {
         vfsClientConnector = new VFSClientConnector();
+        Map<String, Object> schemeFileOptions = Utils.getFileSystemOptionObjectMap(uriOption.getValue(),
+                fileSystemOptions);
+        try {
+            vfsClientConnector.init(null, null, schemeFileOptions);
+        } catch (ClientConnectorException e) {
+            throw new ConnectionUnavailableException("Exception occured when initializing VFSClientConnector", e);
+        }
         if (metrics != null) {
             metrics.updateMetrics(siddhiAppContext.getExecutorService());
         }

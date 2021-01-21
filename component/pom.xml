@@ -69,8 +69,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons.wso2</groupId>
+            <groupId>org.wso2.org.apache.commons</groupId>
             <artifactId>commons-vfs2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -152,7 +156,8 @@
                             org.wso2.transport.file.*,
                             org.apache.commons.net.*,
                             org.quartz.*,
-                            io.siddhi.extension.util.*
+                            io.siddhi.extension.util.*,
+                            com.jcraft.jsch.*
                         </Private-Package>
                         <Export-Package>
                             io.siddhi.extension.io.file.*,
@@ -164,7 +169,8 @@
                             !org.apache.commons.compress.*,
                             !org.wso2.transport.file.*,
                             !org.apache.commons.net.*,
-                            !org.quartz.*
+                            !org.quartz.*,
+                            !com.jcraft.jsch.*
                         </Export-Package>
                         <Import-Package>
                             !org.wso2.carbon.messaging.*,
@@ -172,6 +178,7 @@
                             !org.apache.commons.vfs2.*,
                             !org.wso2.transport.file.*,
                             !org.apache.commons.net.*,
+                            !com.jcraft.jsch.*,
                             io.siddhi.core.*;version="${siddhi.version.range}",
                             io.siddhi.annotation.*;version="${siddhi.version.range}",
                             io.siddhi.query.compiler.*;version="${siddhi.version.range}",

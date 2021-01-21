@@ -26,6 +26,7 @@ import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
+import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.stream.function.StreamFunctionProcessor;
@@ -70,6 +71,16 @@ import java.util.zip.ZipInputStream;
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "<Empty_String>"
+                ),
+                @Parameter(
+                        name = "file.system.options",
+                        description = "The file options in key:value pairs separated by commas. \n" +
+                                "eg:'USER_DIR_IS_ROOT:false,PASSIVE_MODE:true,AVOID_PERMISSION_CHECK:true," +
+                                "IDENTITY:file://demo/.ssh/id_rsa,IDENTITY_PASS_PHRASE:wso2carbon'\n" +
+                                "Note: when IDENTITY is used, use a RSA PRIVATE KEY",
+                        type = DataType.STRING,
+                        optional = true,
+                        defaultValue = "<Empty_String>"
                 )
         },
         parameterOverloads = {
@@ -78,6 +89,9 @@ import java.util.zip.ZipInputStream;
                 ),
                 @ParameterOverload(
                         parameterNames = {"uri", "include.by.regexp"}
+                ),
+                @ParameterOverload(
+                        parameterNames = {"uri", "include.by.regexp", "file.system.options"}
                 )
         },
         returnAttributes = {
@@ -101,12 +115,17 @@ public class FileSearchInArchiveExtension extends StreamFunctionProcessor {
     private static final Logger log = Logger.getLogger(FileSearchInArchiveExtension.class);
     private Pattern pattern = null;
     private int inputExecutorLength;
+    private String fileSystemOptions = null;
 
     @Override
     protected StateFactory init(AbstractDefinition inputDefinition, ExpressionExecutor[] attributeExpressionExecutors,
                                 ConfigReader configReader, boolean outputExpectsExpiredEvents,
                                 SiddhiQueryContext siddhiQueryContext) {
         inputExecutorLength = attributeExpressionExecutors.length;
+        if (inputExecutorLength == 4 &&
+                attributeExpressionExecutors[3] instanceof ConstantExpressionExecutor) {
+            fileSystemOptions = ((ConstantExpressionExecutor) attributeExpressionExecutors[3]).getValue().toString();
+        }
         return null;
     }
 
@@ -157,7 +176,7 @@ public class FileSearchInArchiveExtension extends StreamFunctionProcessor {
         ZipInputStream zip = null;
         TarArchiveInputStream tarInput = null;
         try {
-            FileObject fileObj = Utils.getFileObject(zipFilePathUri);
+            FileObject fileObj = Utils.getFileObject(zipFilePathUri, fileSystemOptions);
             if (fileObj.isFile()) {
                 if (zipFilePathUri.endsWith(Constant.ZIP_FILE_EXTENSION)) {
                     InputStream input = fileObj.getContent().getInputStream();

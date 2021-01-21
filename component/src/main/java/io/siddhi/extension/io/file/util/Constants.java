@@ -50,6 +50,9 @@ public class Constants {
     public static final String HEADER_PRESENT = "header.present";
     public static final String READ_ONLY_HEADER = "read.only.header";
     public static final String CRON_EXPRESSION = "cron.expression";
+    public static final String FILE_NAME_PATTERN = "file.name.pattern";
+    public static final String FILE_NAME_PATTERN_PROPERTY_NAME = "fileNamePattern";
+    public static final String FILE_SYSTEM_OPTIONS = "file.system.options";
 
     /* configuration param values*/
     public static final String MOVE = "move";
@@ -113,6 +116,8 @@ public class Constants {
     public static final String LAST_MODIFIED_TIMESTAMP = "lastModifiedTimestamp";
 
     public static final String UTF_8 = "UTF-8";
+
+    public static final String PROCESSED_FILE_LIST = "processedFileList";
 
     /*prometheus reporte values*/
     public static final String PROMETHEUS_REPORTER_NAME = "prometheus";

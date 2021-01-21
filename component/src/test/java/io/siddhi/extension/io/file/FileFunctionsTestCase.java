@@ -97,6 +97,7 @@ public class FileFunctionsTestCase {
                 for (Event event : events) {
                     if (n == 0) {
                         AssertJUnit.assertEquals("WSO2", event.getData(0));
+                        AssertJUnit.assertEquals(true, event.getData(1));
                     } else {
                         AssertJUnit.fail("More events received than expected.");
                     }
@@ -120,7 +121,7 @@ public class FileFunctionsTestCase {
                 "define stream CopyFileStream(sample string);\n" +
                 "from CopyFileStream#file:copy" +
                 "('" + sourceRoot + "/archive', '" + sourceRoot + "/destination', '', " + false + ")\n" +
-                "select *\n" +
+                "select sample, isSuccess \n" +
                 "insert into ResultStream;";
         SiddhiManager siddhiManager = new SiddhiManager();
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
@@ -134,6 +135,7 @@ public class FileFunctionsTestCase {
                 for (Event event : events) {
                     if (n == 0) {
                         AssertJUnit.assertEquals("WSO2", event.getData(0));
+                        AssertJUnit.assertEquals(true, event.getData(1));
                     } else {
                         AssertJUnit.fail("More events received than expected.");
                     }
@@ -171,6 +173,7 @@ public class FileFunctionsTestCase {
                 for (Event event : events) {
                     if (n == 0) {
                         AssertJUnit.assertEquals("WSO2", event.getData(0));
+                        AssertJUnit.assertEquals(true, event.getData(1));
                     } else {
                         AssertJUnit.fail("More events received than expected.");
                     }
@@ -208,6 +211,7 @@ public class FileFunctionsTestCase {
                 for (Event event : events) {
                     if (n == 0) {
                         AssertJUnit.assertEquals("WSO2", event.getData(0));
+                        AssertJUnit.assertEquals(true, event.getData(1));
                     } else {
                         AssertJUnit.fail("More events received than expected.");
                     }
@@ -674,7 +678,7 @@ public class FileFunctionsTestCase {
                 "define stream MoveFileStream(sample string);\n" +
                 "from MoveFileStream" +
                 "#file:move('" + tempSource + "/archive/', '" + sourceRoot + "/destination', '')\n" +
-                "select * \n" +
+                "select sample, isSuccess \n" +
                 "insert into ResultStream;";
         SiddhiManager siddhiManager = new SiddhiManager();
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
@@ -688,6 +692,7 @@ public class FileFunctionsTestCase {
                 for (Event event : events) {
                     if (n == 0) {
                         AssertJUnit.assertEquals("WSO2", event.getData(0));
+                        AssertJUnit.assertEquals(true, event.getData(1));
                     } else {
                         AssertJUnit.fail("More events received than expected.");
                     }
@@ -700,6 +705,45 @@ public class FileFunctionsTestCase {
         siddhiAppRuntime.shutdown();
         AssertJUnit.assertTrue(isFileExist(sourceRoot + "/destination/archive/test.txt", false));
         AssertJUnit.assertFalse(isFileExist(tempSource + "/archive/test.txt", false));
+    }
+
+    @Test
+    public void folderMoveNegativeTestcase() throws InterruptedException, IOException {
+        FileUtils.copyDirectory(sourceRoot, tempSource);
+        log.info("file:move() function should return false when the source folder is not found. " +
+                "This test case validates that");
+        AssertJUnit.assertFalse(isFileExist(sourceRoot + "/destination", false));
+        count.set(0);
+        String app = "" +
+                "@App:name('TestSiddhiApp')" +
+                "define stream MoveFileStream(sample string);\n" +
+                "from MoveFileStream" +
+                "#file:move('" + tempSource + "/archivee/', '" + sourceRoot + "/destination', '')\n" +
+                "select sample, isSuccess \n" +
+                "insert into ResultStream;";
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("MoveFileStream");
+        siddhiAppRuntime.addCallback("ResultStream", new StreamCallback() {
+
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                int n = count.getAndIncrement();
+                for (Event event : events) {
+                    if (n == 0) {
+                        AssertJUnit.assertEquals("WSO2", event.getData(0));
+                        AssertJUnit.assertEquals(false, event.getData(1));
+                    } else {
+                        AssertJUnit.fail("More events received than expected.");
+                    }
+                }
+            }
+        });
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WSO2"});
+        Thread.sleep(100);
+        siddhiAppRuntime.shutdown();
     }
 
     @Test
@@ -726,6 +770,7 @@ public class FileFunctionsTestCase {
                 for (Event event : events) {
                     if (n == 0) {
                         AssertJUnit.assertEquals("WSO2", event.getData(0));
+                        AssertJUnit.assertEquals(true, event.getData(1));
                     } else {
                         AssertJUnit.fail("More events received than expected.");
                     }
@@ -741,6 +786,86 @@ public class FileFunctionsTestCase {
         AssertJUnit.assertFalse(isFileExist(tempSource + "/archive/subFolder/test3.txt", false));
     }
 
+    @Test
+    public void folderMoveWithDynamicParams() throws InterruptedException, IOException {
+        FileUtils.copyDirectory(sourceRoot, tempSource);
+        log.info("test Siddhi Io File move() allows dynamic params");
+        AssertJUnit.assertFalse(isFileExist(sourceRoot + "/destination", false));
+        String app = "" +
+                "@App:name('TestSiddhiApp')" +
+                "define stream CopyFileStream(regex string);\n" +
+                "from CopyFileStream#file:move" +
+                "('" + tempSource + "/archive', '" + sourceRoot + "/destination', regex)\n" +
+                "select *\n" +
+                "insert into ResultStream;";
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("CopyFileStream");
+        siddhiAppRuntime.addCallback("ResultStream", new StreamCallback() {
+
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                int n = count.getAndIncrement();
+                for (Event event : events) {
+                    if (n == 0) {
+                        AssertJUnit.assertEquals(".*test3.txt$", event.getData(0));
+                        AssertJUnit.assertEquals(true, event.getData(1));
+                    } else {
+                        AssertJUnit.fail("More events received than expected.");
+                    }
+                }
+            }
+        });
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{".*test3.txt$"});
+        Thread.sleep(100);
+        siddhiAppRuntime.shutdown();
+        AssertJUnit.assertTrue(isFileExist(sourceRoot + "/destination/archive/subFolder/test3.txt", false));
+        AssertJUnit.assertFalse(isFileExist(sourceRoot + "/destination/archive/test.txt", false));
+        AssertJUnit.assertFalse(isFileExist(tempSource + "/archive/subFolder/test3.txt", false));
+    }
+
+    @Test
+    public void folderMoveExcludingParentFolder() throws InterruptedException, IOException {
+        FileUtils.copyDirectory(sourceRoot, tempSource);
+        log.info("test Siddhi Io File move() with a dynamic value for exclude.root.dir parameter");
+        AssertJUnit.assertFalse(isFileExist(sourceRoot + "/destination", false));
+        String app = "" +
+                "@App:name('TestSiddhiApp')" +
+                "define stream CopyFileStream(regex string, excludeParent bool);\n" +
+                "from CopyFileStream#file:move" +
+                "('" + tempSource + "/archive', '" + sourceRoot + "/destination', regex, excludeParent)\n" +
+                "select *\n" +
+                "insert into ResultStream;";
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("CopyFileStream");
+        siddhiAppRuntime.addCallback("ResultStream", new StreamCallback() {
+
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                int n = count.getAndIncrement();
+                for (Event event : events) {
+                    if (n == 0) {
+                        AssertJUnit.assertEquals(".*test3.txt$", event.getData(0));
+                        AssertJUnit.assertEquals(true, event.getData(1));
+                        AssertJUnit.assertEquals(true, event.getData(2));
+                    } else {
+                        AssertJUnit.fail("More events received than expected.");
+                    }
+                }
+            }
+        });
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{".*test3.txt$", true});
+        Thread.sleep(1000);
+        siddhiAppRuntime.shutdown();
+        AssertJUnit.assertTrue(isFileExist(sourceRoot + "/destination/subFolder/test3.txt", false));
+        AssertJUnit.assertFalse(isFileExist(sourceRoot + "/destination/test.txt", false));
+        AssertJUnit.assertFalse(isFileExist(tempSource + "/archive/subFolder/test3.txt", false));
+    }
 
     @Test
     public void fileIsFileFunction() throws InterruptedException {
@@ -832,6 +957,7 @@ public class FileFunctionsTestCase {
                 for (Event event : events) {
                     if (n == 0) {
                         AssertJUnit.assertEquals("WSO2", event.getData(0));
+                        AssertJUnit.assertEquals(true, event.getData(1));
                     } else {
                         AssertJUnit.fail("More events received than expected.");
                     }
@@ -1069,78 +1195,6 @@ public class FileFunctionsTestCase {
                         Pattern pattern = Pattern.compile("[0-9][0-9]/[0-9][0-9]/[0-9][0-9][0-9][0-9] " +
                                 "[0-9][0-9]:[0-9][0-9]:[0-9][0-9]");
                         AssertJUnit.assertTrue(pattern.matcher((String) event.getData(0)).lookingAt());
-                    } else {
-                        AssertJUnit.fail("More events received than expected.");
-                    }
-                }
-            }
-        });
-        siddhiAppRuntime.start();
-        stockStream.send(new Object[]{"WSO2"});
-        Thread.sleep(100);
-        siddhiAppRuntime.shutdown();
-    }
-
-    @Test
-    public void ftpFileCopyFunction() throws InterruptedException {
-        log.info("test Siddhi Io File Function for copy()");
-        AssertJUnit.assertFalse(isFileExist(sourceRoot + "/destination", false));
-        String app = "" +
-                "@App:name('TestSiddhiApp')" +
-                "define stream CopyFileStream(sample string);\n" +
-                "from CopyFileStream#file:copy" +
-                "('ftp://bob:password@localhost:21/test1/function/testFile/test.txt', " +
-                    "'ftp://bob:password@localhost:21/test1/function/destination', '')\n" +
-                "select *\n" +
-                "insert into ResultStream;";
-        SiddhiManager siddhiManager = new SiddhiManager();
-        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
-        InputHandler stockStream = siddhiAppRuntime.getInputHandler("CopyFileStream");
-        siddhiAppRuntime.addCallback("ResultStream", new StreamCallback() {
-
-            @Override
-            public void receive(Event[] events) {
-                EventPrinter.print(events);
-                int n = count.getAndIncrement();
-                for (Event event : events) {
-                    if (n == 0) {
-                        AssertJUnit.assertEquals("WSO2", event.getData(0));
-                    } else {
-                        AssertJUnit.fail("More events received than expected.");
-                    }
-                }
-            }
-        });
-        siddhiAppRuntime.start();
-        stockStream.send(new Object[]{"WSO2"});
-        Thread.sleep(100);
-        siddhiAppRuntime.shutdown();
-    }
-
-    @Test
-    public void ftpFolderCopyFunction() throws InterruptedException {
-        log.info("test Siddhi Io File Function for copy()");
-        AssertJUnit.assertFalse(isFileExist(sourceRoot + "/destination", false));
-        String app = "" +
-                "@App:name('TestSiddhiApp')" +
-                "define stream CopyFileStream(sample string);\n" +
-                "from CopyFileStream#file:copy" +
-                "('ftp://bob:password@localhost:21/test1/function/archive', " +
-                    "'ftp://bob:password@localhost:21/test1/function/destination', '')\n" +
-                "select *\n" +
-                "insert into ResultStream;";
-        SiddhiManager siddhiManager = new SiddhiManager();
-        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
-        InputHandler stockStream = siddhiAppRuntime.getInputHandler("CopyFileStream");
-        siddhiAppRuntime.addCallback("ResultStream", new StreamCallback() {
-
-            @Override
-            public void receive(Event[] events) {
-                EventPrinter.print(events);
-                int n = count.getAndIncrement();
-                for (Event event : events) {
-                    if (n == 0) {
-                        AssertJUnit.assertEquals("WSO2", event.getData(0));
                     } else {
                         AssertJUnit.fail("More events received than expected.");
                     }

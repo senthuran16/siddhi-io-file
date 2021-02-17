@@ -79,11 +79,8 @@ public class FileSourceMoveIfExistsTestcase {
             FileUtils.copyDirectory(sourceRoot, newRoot);
             movedFiles = new File(moveAfterProcessDir);
         } catch (IOException e) {
-            throw new TestException("Failed to copy files from " +
-                    sourceRoot.getAbsolutePath() +
-                    " to " +
-                    newRoot.getAbsolutePath() +
-                    " which are required for tests. Hence aborting tests.", e);
+            throw new TestException("Failed to copy files from " + sourceRoot.getAbsolutePath() + " to " +
+                    newRoot.getAbsolutePath() + " which are required for tests. Hence aborting tests.", e);
         }
     }
 

@@ -1028,9 +1028,6 @@ public class FileSource extends Source<FileSource.FileSourceState> {
                             "on regex mode when tailing disabled or in Text Full mode. Given mode: " + mode
                             + ". Tailing enabled: " + isTailingEnabled);
                 }
-            } else if (Constants.TEXT_FULL.equalsIgnoreCase(mode)) {
-                log.warn("Transport property trp:eof will only be supported in Regex mode in the future releases. " +
-                        "The support in Text Full mode is deprecated.");
             }
         }
     }

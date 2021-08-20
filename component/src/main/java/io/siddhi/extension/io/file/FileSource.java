@@ -508,7 +508,6 @@ public class FileSource extends Source<FileSource.FileSourceState> {
             tailing = optionHolder.validateAndGetStaticValue(Constants.TAILING, Constants.TRUE);
         }
         isTailingEnabled = Boolean.parseBoolean(tailing);
-
         readOnlyHeader = optionHolder.validateAndGetStaticValue(Constants.READ_ONLY_HEADER, "false");
         readOnlyTrailer = optionHolder.validateAndGetStaticValue(Constants.READ_ONLY_TRAILER, "false");
         skipTrailer = optionHolder.validateAndGetStaticValue(Constants.SKIP_TRAILER, "false");

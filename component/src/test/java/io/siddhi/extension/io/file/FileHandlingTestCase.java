@@ -291,12 +291,12 @@ public class FileHandlingTestCase {
     public void siddhiIOFileTest5() throws InterruptedException, IOException {
         log.info("Siddhi IO File Testcase 5");
         File newFile = new File(newRoot + "/destination.txt");
-        File newFile2 = new File(newRoot + "/destination");
+        File newFolder = new File(newRoot + "/destination");
         if (newFile.createNewFile()) {
             log.debug("New file has been created");
         }
-        if (newFile2.createNewFile()) {
-            log.debug("New file has been created");
+        if (newFolder.mkdir()) {
+            log.debug("New folder has been created");
         }
         String app = "" +
                 "@App:name('TestFileEventListener') @source(type='fileeventlistener', " +
@@ -317,20 +317,10 @@ public class FileHandlingTestCase {
                 EventPrinter.print(events);
                 int n = count.getAndIncrement();
                 for (Event event : events) {
-                    if (n < 3) {
-                        if (event.getData(2).equals("created")) {
-                            if (event.getData(1).equals("destination.txt")) {
-                                Assert.assertEquals(newRoot + "/destination.txt", event.getData(0));
-                            } else if (event.getData(1).equals("destination")) {
-                                Assert.assertEquals(newRoot + "/destination", event.getData(0));
-                            } else {
-                                Assert.fail("Did not received correct events.");
-                            }
-                        } else if (event.getData(2).equals("removed")) {
-                            Assert.assertEquals(newRoot + "/destination.txt", event.getData(0));
-                        } else {
-                            Assert.fail("Did not received correct events.");
-                        }
+                    if (n == 0 || n == 2) {
+                        Assert.assertEquals(newRoot + "/destination.txt", event.getData(0));
+                    } else if (n == 1) {
+                        Assert.assertEquals(newRoot + "/destination", event.getData(0));
                     } else {
                         Assert.fail("More events received than expected.");
                     }

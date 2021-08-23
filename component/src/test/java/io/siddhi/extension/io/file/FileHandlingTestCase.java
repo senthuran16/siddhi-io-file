@@ -318,9 +318,9 @@ public class FileHandlingTestCase {
                 int n = count.getAndIncrement();
                 for (Event event : events) {
                     if (n == 0 || n == 2) {
-                        Assert.assertEquals(newRoot + "/destination.txt", event.getData(0));
+                        Assert.assertEquals(event.getData(0), newRoot + "/destination.txt");
                     } else if (n == 1) {
-                        Assert.assertEquals(newRoot + "/destination", event.getData(0));
+                        Assert.assertEquals(event.getData(0), newRoot + "/destination");
                     } else {
                         Assert.fail("More events received than expected.");
                     }
@@ -328,13 +328,13 @@ public class FileHandlingTestCase {
             }
         });
         siddhiAppRuntime.start();
-        SiddhiTestHelper.waitForEvents(100, 2, count.get(), 3000);
+        SiddhiTestHelper.waitForEvents(100, 2, count.get(), 5000);
         if (newFile.delete()) {
             log.debug("File is deleted");
         }
-        SiddhiTestHelper.waitForEvents(100, 3, count.get(), 3000);
+        SiddhiTestHelper.waitForEvents(100, 3, count.get(), 5000);
         siddhiAppRuntime.shutdown();
-        Assert.assertEquals(3, count.get());
+        Assert.assertEquals(count.get(), 3);
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)

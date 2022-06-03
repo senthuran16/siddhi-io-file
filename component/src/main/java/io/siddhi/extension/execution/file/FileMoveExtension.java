@@ -194,7 +194,7 @@ public class FileMoveExtension extends StreamFunctionProcessor {
         boolean excludeParentFolder = false;
         if (inputExecutorLength == 3) {
             regex = (String) data[2];
-        } else if (inputExecutorLength >= 4) {
+        } else if (inputExecutorLength == 4) {
             regex = (String) data[2];
             excludeParentFolder = (Boolean) data[3];
         }

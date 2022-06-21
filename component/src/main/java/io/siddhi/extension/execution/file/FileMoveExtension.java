@@ -139,8 +139,9 @@ import java.util.regex.Pattern;
         }
 )
 public class FileMoveExtension extends StreamFunctionProcessor {
-    private static final Logger log = Logger.getLogger(FileCopyExtension.class);
+    private static final Logger log = Logger.getLogger(FileMoveExtension.class);
     private Pattern pattern = null;
+    private String regex = "";
     private int inputExecutorLength;
     private FileMoveMetrics fileMoveMetrics;
     private String fileSystemOptions = null;
@@ -190,16 +191,21 @@ public class FileMoveExtension extends StreamFunctionProcessor {
     protected Object[] process(Object[] data) {
         String uri = (String) data[0];
         String destinationDirUri = (String) data[1];
-        String regex = "";
         boolean excludeParentFolder = false;
-        if (inputExecutorLength == 3) {
+        boolean regexUpdate = false;
+        if (inputExecutorLength >= 3 && !regex.equals((String) data[2])) {
             regex = (String) data[2];
-        } else if (inputExecutorLength >= 4) {
-            regex = (String) data[2];
-            excludeParentFolder = (Boolean) data[3];
+            regexUpdate = true;
         }
-        if (pattern == null) {
+        if (pattern == null || regexUpdate) {
             pattern = Pattern.compile(regex);
+            if (log.isDebugEnabled()) {
+                log.debug("The regex pattern was successfully updated to pattern which is bounded to the regex value"
+                        + "'" + regex + "'.");
+            }
+        }
+        if (inputExecutorLength >= 4) {
+            excludeParentFolder = (Boolean) data[3];
         }
         try {
             FileObject rootFileObject = Utils.getFileObject(uri, fileSystemOptions);

@@ -26,6 +26,8 @@ import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.FileSystemOptions;
 import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.provider.UriParser;
+import org.apache.commons.vfs2.provider.sftp.SftpFileSystemConfigBuilder;
+import org.apache.log4j.Logger;
 import org.wso2.transport.remotefilesystem.exception.RemoteFileSystemConnectorException;
 import org.wso2.transport.remotefilesystem.server.util.FileTransportUtils;
 
@@ -51,6 +53,8 @@ import static io.siddhi.extension.util.Constant.VFS_SCHEME_KEY;
  * Util Class.
  */
 public class Utils {
+    private static final Logger log = Logger.getLogger(Utils.class);
+
     /**
      * Returns the FileObject in the given file path
      *
@@ -64,6 +68,12 @@ public class Utils {
         try {
             fsManager = VFS.getManager();
             sourceFso = FileTransportUtils.attachFileSystemOptions(fileSystemOptionMap);
+            SftpFileSystemConfigBuilder configBuilder = SftpFileSystemConfigBuilder.getInstance();
+            if (fileSystemOptionMap.get("session.timeout") != null) {
+                configBuilder.setTimeout(sourceFso, Integer.parseInt(fileSystemOptionMap.get("session.timeout")));
+                log.info("The session timeout was set successfully, the configured timeout is : "
+                        + fileSystemOptionMap.get("session.timeout"));
+            }
             return fsManager.resolveFile(filePathUri, sourceFso);
         } catch (FileSystemException e) {
             throw new SiddhiAppRuntimeException("Exception occurred when getting VFS manager", e);

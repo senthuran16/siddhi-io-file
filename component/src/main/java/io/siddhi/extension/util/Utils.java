@@ -69,7 +69,7 @@ public class Utils {
             fsManager = VFS.getManager();
             sourceFso = FileTransportUtils.attachFileSystemOptions(fileSystemOptionMap);
             SftpFileSystemConfigBuilder configBuilder = SftpFileSystemConfigBuilder.getInstance();
-            if (fileSystemOptionMap.get("session.timeout") != null) {
+            if (fileSystemOptionMap.get(Constant.SFTP_SESSION_TIMEOUT) != null) {
                 configBuilder.setTimeout(sourceFso, Integer.parseInt(fileSystemOptionMap.get("session.timeout")));
                 log.info("The session timeout was set successfully, the configured timeout is : "
                         + fileSystemOptionMap.get("session.timeout"));

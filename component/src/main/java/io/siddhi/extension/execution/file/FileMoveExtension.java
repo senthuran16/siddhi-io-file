@@ -200,7 +200,7 @@ public class FileMoveExtension extends StreamFunctionProcessor {
         if (pattern == null || regexUpdate) {
             pattern = Pattern.compile(regex);
             if (log.isDebugEnabled()) {
-                log.debug("The regex pattern was successfully updated to pattern which is bounded to the regex value"
+                log.debug("The regex pattern was successfully updated to pattern which is bounded to the regex value "
                         + "'" + regex + "'.");
             }
         }

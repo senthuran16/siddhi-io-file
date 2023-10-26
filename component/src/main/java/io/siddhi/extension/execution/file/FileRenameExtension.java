@@ -39,8 +39,7 @@ import io.siddhi.query.api.definition.Attribute;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.Selectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 
 import java.util.ArrayList;
@@ -52,7 +51,12 @@ import java.util.List;
 @Extension(
         name = "rename",
         namespace = "file",
-        description = "Rename file/folder in a particular path",
+        description = "This method can be used to rename a file/folder in a particular path, move a file from to a " +
+                "different path. \n" +
+                "Ex- \n" +
+                " file:rename('/User/wso2/source', 'User/wso2/destination') \n" +
+                " file:rename('/User/wso2/source/file.csv', 'User/wso2/source/newFile.csv') \n " +
+                " file:rename('/User/wso2/source/file.csv', 'User/wso2/destination/file.csv')",
         parameters = {
                 @Parameter(
                         name = "uri",
@@ -104,7 +108,7 @@ import java.util.List;
         }
 )
 public class FileRenameExtension extends StreamFunctionProcessor {
-    private static final Logger log = LogManager.getLogger(FileRenameExtension.class);
+    private static final Logger log = Logger.getLogger(FileRenameExtension.class);
     private String fileSystemOptions = null;
 
     private FileRenameMetrics fileRenameMetrics;
@@ -167,34 +171,35 @@ public class FileRenameExtension extends StreamFunctionProcessor {
         }
         FileObject oldFileObject = Utils.getFileObject(oldFileOrFolderName, fileSystemOptions);
         FileObject newFileObject = Utils.getFileObject(newFileOrFolderName, fileSystemOptions);
-        try {
-            oldFileObject.canRenameTo(newFileObject);
 
-            newFileObject.copyFrom(oldFileObject, Selectors.SELECT_ALL);
-
-        } catch (FileSystemException e) {
-            log.error("Error while copying the content from " + oldFileOrFolderName + " to "
-                    + newFileOrFolderName, e);
-            if (fileRenameMetrics != null) {
-                fileRenameMetrics.getRenameMetric(0);
+        if (oldFileObject.canRenameTo(newFileObject)) {
+            try {
+                newFileObject.copyFrom(oldFileObject, Selectors.SELECT_ALL);
+            } catch (FileSystemException e) {
+                log.error("Error while copying the content from " + oldFileOrFolderName + " to "
+                        + newFileOrFolderName + ": " + e.getMessage());
+                if (fileRenameMetrics != null) {
+                    fileRenameMetrics.getRenameMetric(0);
+                }
+                return new Object[]{false};
             }
-            throw new SiddhiAppRuntimeException("Error while copying the content from "
-                    + oldFileOrFolderName + " to " + newFileOrFolderName, e);
-        }
 
-        try {
-            oldFileObject.delete(Selectors.SELECT_ALL);
-        } catch (FileSystemException e) {
-            log.error("Error while deleting the content from " + oldFileOrFolderName, e);
-            if (fileRenameMetrics != null) {
-                fileRenameMetrics.getRenameMetric(0);
+            try {
+                oldFileObject.delete(Selectors.SELECT_ALL);
+            } catch (FileSystemException e) {
+                log.error("Error while deleting the file " + oldFileOrFolderName + " after renaming ",
+                        e);
+                if (fileRenameMetrics != null) {
+                    fileRenameMetrics.getRenameMetric(0);
+                }
             }
-            throw new SiddhiAppRuntimeException("Error while deleting the file " + oldFileObject.getName() + " from " +
-                    oldFileOrFolderName, e);
+        } else {
+            log.error("Cannot rename the given file " + oldFileOrFolderName + " to " + newFileOrFolderName);
+            return new Object[]{false};
         }
         if (fileRenameMetrics != null) {
             fileRenameMetrics.getRenameMetric(1);
         }
-        return new Object[0];
+        return new Object[]{true};
     }
 }
